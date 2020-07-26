@@ -1,0 +1,36 @@
+﻿<Project DefaultTargets="LinkNative">
+  <!-- <Project > -->
+    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="$(IlcPath)\build\Microsoft.NETCore.Native.targets" Condition="$(NativeCodeGen) == 'wasm'"/>
+
+  <ItemGroup>
+    <IlcArg Include="--targetarch=$(Platform)" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <DefineConstants Condition="$(NativeCodeGen) == 'wasm'">$(DefineConstants);CODEGEN_WASM</DefineConstants>
+    <RootAllApplicationAssemblies>false</RootAllApplicationAssemblies>
+    <IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EmccExtraArgs>-s USE_SDL=2</EmccExtraArgs>
+  </PropertyGroup>
+  <!-- <ItemGroup Condition="Ta"> -->
+  <!--   <None Include="e:\sdl\sdl2.dll"> -->
+  <!--     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory> -->
+  <!--   </None> -->
+  <!-- </ItemGroup> -->
+</Project>

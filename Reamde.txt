@@ -1,0 +1,4 @@
+﻿set IlcPath=e:\github\corert\bin\WebAssembly.wasm.Debug
+
+
+"E:\GitHub\corert\buildscripts\..\Tools\dotnetcli\dotnet.exe" msbuild /m /ConsoleLoggerParameters:ForceNoAlign "/p:IlcPath=E:\GitHub\corert\tests\\..\bin\WebAssembly.wasm.Debug" "/p:Configuration=Debug" "/p:OSGroup=WebAssembly" "/p:Platform=wasm" "/p:RepoLocalBuild=true" "/p:FrameworkLibPath=E:\GitHub\corert\tests\..\bin\WebAssembly.wasm.Debug\lib" "/p:FrameworkObjPath=E:\GitHub\corert\tests\..\bin\obj\WebAssembly.wasm.Debug\Framework"  /p:NativeCodeGen=wasm wasmsdl.csproj
