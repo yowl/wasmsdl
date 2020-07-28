@@ -64,7 +64,6 @@ namespace wasmsdl
             public fixed int TextureBuffer[Width * Height];
         }
 
-        //static int[] textureBuffer = new int[Width * Height];
         static FirePixels firePixels;
         static Buffer buffer;
 
@@ -113,11 +112,7 @@ namespace wasmsdl
 
         private static void Render(IntPtr renderer, IntPtr texture)
         {
-//            SDL.SDL_SetRenderTarget(renderer, texture);
-
-
             RenderEffect();
-  //          SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
             fixed (int *bPtr = buffer.TextureBuffer)
             {
                 SDL.SDL_UpdateTexture(texture, IntPtr.Zero, (IntPtr)bPtr, Width * sizeof(int));
