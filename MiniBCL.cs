@@ -1,3 +1,4 @@
+#if CODEGEN_WASM
 namespace System
 {
     using System.Runtime.CompilerServices;
@@ -254,3 +255,4 @@ namespace Internal.Runtime.CompilerHelpers
         }
     }
 }
+#endif

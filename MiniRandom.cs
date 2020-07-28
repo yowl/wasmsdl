@@ -9,5 +9,11 @@ struct MiniRandom
         _val = seed;
     }
 
-    public uint Next() => _val = (1103515245 * _val + 12345) % 2147483648;
+    public uint Next()
+    {
+        _val ^= (_val << 13);
+        _val ^= (_val >> 7);
+        _val ^= (_val << 17);
+        return _val;
+    }
 }

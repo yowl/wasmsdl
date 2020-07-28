@@ -1,3 +1,4 @@
+#if CODEGEN_WASM
 using System;
 using System.Runtime.InteropServices;
 
@@ -129,3 +130,5 @@ namespace System.Runtime.CompilerServices
         public int initialized;
     }
 }
+
+#endif
