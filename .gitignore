@@ -5,3 +5,10 @@ obj/*
 *~
 *.swp
 .vs/
+*.ilexe
+*.bc
+/wasmsdl.html
+*.js
+*.pdb
+/wasmsdl.txt
+*.wasm

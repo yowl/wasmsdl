@@ -2,32 +2,16 @@
 using SDL2;
 using System.Runtime.InteropServices;
 
-namespace System.Runtime.InteropServices
-{
-    [AttributeUsage(AttributeTargets.Method)]
-    public sealed class UnmanagedCallersOnlyAttribute : Attribute
-    {
-        /// </summary>
-        public CallingConvention CallingConvention;
-
-        /// <summary>
-        /// Optional. If omitted, no named export is emitted during compilation.
-        /// </summary>
-        public string? EntryPoint;
-    }
-}
-
 namespace wasmsdl
 {
     unsafe class Program
     {
 #if CODEGEN_WASM
         [DllImport("*")]
-        internal static extern unsafe void emscripten_set_main_loop(delegate*<void> f, int fps, int
-            simulate_infinite_loop);
+        internal static extern unsafe void emscripten_set_main_loop(delegate*<void> f, int fps, int simulate_infinite_loop);
 #endif
-        const int Width = 320;
-        const int Height = 180;
+        const int Width = 640;
+        const int Height = 200;
 
         static ReadOnlySpan<byte> palette => new byte[]
         {
@@ -75,7 +59,14 @@ namespace wasmsdl
             public fixed byte Data[Width * Height];
         }
 
+        struct Buffer
+        {
+            public fixed int TextureBuffer[Width * Height];
+        }
+
+        //static int[] textureBuffer = new int[Width * Height];
         static FirePixels firePixels;
+        static Buffer buffer;
 
         static MiniRandom rng;
 
@@ -95,7 +86,7 @@ namespace wasmsdl
             }
         }
 
-        private static void RenderEffect(uint tick, IntPtr renderer)
+        private static void RenderEffect()
         {
             for (int x = 1; x < Width; x++)
             {
@@ -105,40 +96,34 @@ namespace wasmsdl
                 }
             }
 
-            // Convert palette buffer to RGB and write it to output.
+            // Convert palette buffer to RGB and write it to textureBuffer.
             for (var y = 0; y < Height; y++)
             {
                 for (var x = 0; x < Width; x++)
                 {
-                    var index = firePixels.Data[y * Width + x];
-                    //Console.WriteLine($"draw point {palette[index * 3 + 0]} {palette[index * 3 + 1]} {palette[index * 3 + 2]}");
-                    SDL.SDL_SetRenderDrawColor(renderer, palette[index * 3 + 0],  palette[index * 3 + 1], palette[index * 3 + 2], 255);
-                    SDL.SDL_RenderDrawPoint(renderer, x, y);
+                    var pIx = y * Width + x;
+                    var index = firePixels.Data[pIx];
+                    buffer.TextureBuffer[pIx] = (palette[index * 3 + 0] << 24)
+                                               | (palette[index * 3 + 1] << 16)
+                                               | (palette[index * 3 + 2] << 8)
+                                               | 255;
                 }
             }
         }
 
         private static void Render(IntPtr renderer, IntPtr texture)
         {
-            SDL.SDL_SetRenderTarget(renderer, texture);
-            // SDL.SDL_Rect r;
-            // r.w = 10;
-            // r.h = 10;
-            // r.x = (int)rng.Next() % (Width - 20);
-            // r.y = (int)rng.Next() % (Width - 20);
-            //
-            // SDL.SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
-            // SDL.SDL_RenderClear(renderer);
-            // SDL.SDL_RenderDrawRect(renderer, ref r);
-            // SDL.SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
-            // SDL.SDL_RenderFillRect(renderer, ref r);
+//            SDL.SDL_SetRenderTarget(renderer, texture);
 
-            RenderEffect(0 /* not used, was GetTickCount */, renderer);
 
-            SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
+            RenderEffect();
+  //          SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
+            fixed (int *bPtr = buffer.TextureBuffer)
+            {
+                SDL.SDL_UpdateTexture(texture, IntPtr.Zero, (IntPtr)bPtr, Width * sizeof(int));
+            }
             SDL.SDL_RenderCopy(renderer, texture, IntPtr.Zero, IntPtr.Zero);
             SDL.SDL_RenderPresent(renderer);
-
         }
 
         private static void InitFramebuff()
@@ -164,38 +149,35 @@ namespace wasmsdl
 
             if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0)
             {
-                Console.WriteLine($"Unable to initialize SDL. Error {SDL.SDL_GetError()}");
+                Console.WriteLine($"Unable to initialize SDL.");
                 return;
             }
 
-            var window = SDL.SDL_CreateWindow("CoreRT Wasm SDL", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
+            byte* title = null;
+
+            var window = SDL.SDL_CreateWindow(title, SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
                 Width, Height, 0);
             if (window == IntPtr.Zero)
             {
-                Console.WriteLine($"Unable to create window. Error {SDL.SDL_GetError()}");
+                Console.WriteLine($"Unable to create window.");
                 return;
             }
 
-            renderer = SDL.SDL_CreateRenderer(window, 0, SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
-            if (renderer == IntPtr.Zero)
-            {
-                Console.WriteLine($"Unable to create renderer. Error {SDL.SDL_GetError()}");
-                return;
-            }
-            //texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_RGBA8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING | (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
-            texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_RGBA8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
-            // SDL.SDL_Event e;
-            // var quit = false;
-
-            SDL.SDL_RenderClear(renderer);
-            SDL.SDL_SetRenderDrawColor(renderer, 7, 7, 7, 255);
-            SDL.SDL_RenderPresent(renderer);
-
-            InitFramebuff();
 #if CODEGEN_WASM
 
             emscripten_set_main_loop(&MainLoop, 0, 0);
-#else
+#endif
+            renderer = SDL.SDL_CreateRenderer(window, 0, SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
+            if (renderer == IntPtr.Zero)
+            {
+                Console.WriteLine($"Unable to create renderer.");
+                return;
+            }
+            texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_RGBA8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
+
+            InitFramebuff();
+#if !CODEGEN_WASM
+
             while (!quit)
             {
                 SDL.SDL_Event e;
