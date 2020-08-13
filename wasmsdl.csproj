@@ -1,5 +1,5 @@
 ﻿<!-- <Project DefaultTargets="LinkNative"> -->
-  <Project >
+  <Project>
     <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
@@ -13,10 +13,14 @@
   </PropertyGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-  <Import Project="$(IlcPath)\build\Microsoft.NETCore.Native.targets" Condition="$(NativeCodeGen) == 'wasm'"/>
+  <Import Project="$(IlcPath)\build\Microsoft.NETCore.Native.targets" Condition="$(NativeCodeGen) == 'wasm'" />
 
   <ItemGroup>
     <IlcArg Include="--targetarch=$(Platform)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="2.80.1" />
   </ItemGroup>
 
   <PropertyGroup>

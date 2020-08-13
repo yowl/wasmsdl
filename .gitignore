@@ -9,3 +9,5 @@ obj/*
 *.bc
 *.pdb
 /wasmsdl.txt
+/packages
+obj/

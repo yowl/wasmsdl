@@ -1,5 +1,4 @@
 ﻿using System;
-using SDL2;
 using System.Runtime.InteropServices;
 
 namespace wasmsdl
