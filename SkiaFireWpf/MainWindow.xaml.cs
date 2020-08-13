@@ -141,6 +141,7 @@ namespace SkiaFireWpf
                 }
             }
 
+            var texBuffer = (int*)(skImage.GetPixels());
             // Convert palette buffer to RGB and write it to textureBuffer.
             for (var y = 0; y < iHeight; y++)
             {
@@ -148,11 +149,6 @@ namespace SkiaFireWpf
                 {
                     var pIx = y * iWidth + x;
                     var index = firePixels.Data[pIx];
-                    if (index != 0 && index != 36)
-                    {
-
-                    }
-                    var texBuffer = (int*)(skImage.GetPixels());
                     texBuffer[pIx] = (255 << 24)
                                      | (palette[index * 3 + 0] << 16)
                                      | (palette[index * 3 + 1] << 8)
