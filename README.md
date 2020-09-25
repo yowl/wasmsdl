@@ -2,7 +2,7 @@
 
 Example of how to use C# and SDL in the browser using CoreRT https://github.com/dotnet/corert and WebAssembly.
 
-![C# fire effect in the browser](wasmfire.gif)
+https://wasmfire.z20.web.core.windows.net/
 
 Set up corert for building WebAssembly https://github.com/dotnet/corert/blob/master/Documentation/how-to-build-WebAssembly.md
 Set IlcPath environment variable to whereever corert is cloned:
