@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+//using SkiaSharp;
 
 namespace wasmsdl
 {
@@ -11,6 +12,51 @@ namespace wasmsdl
 #endif
         const int Width = 640;
         const int Height = 200;
+        //static EMSCRIPTEN_WEBGL_CONTEXT_HANDLE glContext;
+        static IntPtr glContext;
+
+        // [StructLayout(LayoutKind.Sequential)]
+        // struct ESContext
+        // {
+        //     /// Put your user data here...
+        //     internal void* userData;
+        //
+        //     /// Window width
+        //     int width;
+        //
+        //     /// Window height
+        //     int height;
+        //
+        //     /// Window handle
+        //     //EGLNativeWindowType hWnd;
+        //     IntPtr hWnd;
+        //
+        //     /// EGL display
+        //     //EGLDisplay eglDisplay;
+        //     IntPtr eglDisplay;
+        //
+        //     /// EGL context
+        //     IntPtr eglContext;
+        //
+        //     /// EGL surface
+        //     IntPtr eglSurface;
+        //
+        //     /// Callbacks
+        //     // void (ESCALLBACK* drawFunc) ( struct _escontext * );
+        //     // void (ESCALLBACK* keyFunc) ( struct _escontext *, unsigned char, int, int );
+        //     // void (ESCALLBACK* updateFunc) ( struct _escontext *, float deltaTime );
+        //     
+        //     IntPtr drawFunc;
+        //     IntPtr keyFunc;
+        //     IntPtr updateFunc;
+        // };
+
+        struct UserData
+        {
+            // Handle to a program object
+            uint programObject;
+
+        };
 
         static ReadOnlySpan<byte> palette => new byte[]
         {
@@ -94,30 +140,29 @@ namespace wasmsdl
                 }
             }
 
-            // Convert palette buffer to RGB and write it to textureBuffer.
-            for (var y = 0; y < Height; y++)
-            {
-                for (var x = 0; x < Width; x++)
-                {
-                    var pIx = y * Width + x;
-                    var index = firePixels.Data[pIx];
-                    buffer.TextureBuffer[pIx] = (palette[index * 3 + 0] << 24)
-                                               | (palette[index * 3 + 1] << 16)
-                                               | (palette[index * 3 + 2] << 8)
-                                               | 255;
-                }
-            }
+            // var texBuffer = (int*)(skImage.GetPixels());
+            // // Convert palette buffer to RGB and write it to textureBuffer.
+            // for (var y = 0; y < Height; y++)
+            // {
+            //     for (var x = 0; x < Width; x++)
+            //     {
+            //         var pIx = y * Width + x;
+            //         var index = firePixels.Data[pIx];
+            //         texBuffer[pIx] = (255 << 24)
+            //                          | (palette[index * 3 + 0] << 16)
+            //                          | (palette[index * 3 + 1] << 8)
+            //                          | palette[index * 3 + 2];
+            //
+            //     }
+            // }
         }
 
-        private static void Render(IntPtr renderer, IntPtr texture)
+        private static void Render() //IntPtr renderer, IntPtr texture)
         {
             RenderEffect();
-            fixed (int *bPtr = buffer.TextureBuffer)
-            {
-                SDL.SDL_UpdateTexture(texture, IntPtr.Zero, (IntPtr)bPtr, Width * sizeof(int));
-            }
-            SDL.SDL_RenderCopy(renderer, texture, IntPtr.Zero, IntPtr.Zero);
-            SDL.SDL_RenderPresent(renderer);
+
+//            canvas.DrawBitmap(skImage, 0, 0); // at top left
+            // need something like this?  SDL.SDL_RenderPresent(renderer);
         }
 
         private static void InitFramebuff()
@@ -129,11 +174,49 @@ namespace wasmsdl
         [UnmanagedCallersOnly(EntryPoint = "MainLoop", CallingConvention = CallingConvention.Cdecl)]
         static void MainLoop()
         {
-            Render(renderer, texture);
+            Render(); //enderer, texture);
         }
 #endif
-        static IntPtr renderer;
-        static IntPtr texture;
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct EmscriptenWebGLContextAttributes
+        {
+            int alpha;
+            int depth;
+            int stencil;
+            int antialias;
+            int premultipliedAlpha;
+            int preserveDrawingBuffer;
+            int powerPreference;
+            int failIfMajorPerformanceCaveat;
+        
+            internal int majorVersion;
+            int minorVersion;
+        
+            int enableExtensionsByDefault;
+            int explicitSwapControl;
+            int proxyContextToMainThread;
+            int renderViaOffscreenBackBuffer;
+        };
+        
+        
+        [DllImport("*")]
+        static extern IntPtr emscripten_webgl_create_context(byte* s, EmscriptenWebGLContextAttributes* attr);
+        [DllImport("*")]
+        static extern void emscripten_webgl_init_context_attributes(EmscriptenWebGLContextAttributes* attr);
+        [DllImport("*")]
+        static extern void emscripten_webgl_make_context_current(IntPtr context);
+
+        // "#canvas"  in the DOM
+        static ReadOnlySpan<byte> s => new byte[]
+        {
+            0x23,
+            0x63,0x61,0x6E,0x76, 0x61, 0x73,
+            0x0
+        };
+
+        // static SKCanvas canvas;
+        // static SKBitmap skImage;
         static void Main()
         {
 #if !CODEGEN_WASM
@@ -141,63 +224,52 @@ namespace wasmsdl
 #endif
             rng = new MiniRandom(5005);
 
-            if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0)
-            {
-                Console.WriteLine($"Unable to initialize SDL.");
-                return;
-            }
+            //skImage = new SKBitmap(new SKImageInfo(Width, Height, SKColorType.Bgra8888, SKAlphaType.Premul));
 
-            byte* title = null;
-
-            var window = SDL.SDL_CreateWindow(title, SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
-                Width, Height, 0);
-            if (window == IntPtr.Zero)
+            EmscriptenWebGLContextAttributes attrs;
+            emscripten_webgl_init_context_attributes(&attrs);
+            attrs.majorVersion = 2;
+            fixed (byte* n = &(s[0]))
             {
-                Console.WriteLine($"Unable to create window.");
-                return;
+                glContext = emscripten_webgl_create_context(n, &attrs);
             }
+            emscripten_webgl_make_context_current(glContext);
+	    emscripten_webgl_commit_frame  
+            // if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0)
+            // {
+            //     Console.WriteLine($"Unable to initialize SDL.");
+            //     return;
+            // }
+            //
+            // byte* title = null;
+            //
+            // var window = SDL.SDL_CreateWindow(title, SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
+            //     Width, Height, 0);
+            // if (window == IntPtr.Zero)
+            // {
+            //     Console.WriteLine($"Unable to create window.");
+            //     return;
+            // }
 
 #if CODEGEN_WASM
 
             emscripten_set_main_loop(&MainLoop, 0, 0);
 #endif
-            renderer = SDL.SDL_CreateRenderer(window, 0, SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
-            if (renderer == IntPtr.Zero)
-            {
-                Console.WriteLine($"Unable to create renderer.");
-                return;
-            }
-            texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_RGBA8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
-
+            // renderer = SDL.SDL_CreateRenderer(window, 0, SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
+            // if (renderer == IntPtr.Zero)
+            // {
+            //     Console.WriteLine($"Unable to create renderer.");
+            //     return;
+            // }
+            // texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_RGBA8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
+            //
             InitFramebuff();
 #if !CODEGEN_WASM
 
-            while (!quit)
-            {
-                SDL.SDL_Event e;
-                while (SDL.SDL_PollEvent(out e) != 0)
-                {
-                    switch (e.type)
-                    {
-                        case SDL.SDL_EventType.SDL_QUIT:
-                            quit = true;
-                            break;
-                        case SDL.SDL_EventType.SDL_KEYDOWN:
-                            switch (e.key.keysym.sym)
-                            {
-                                case SDL.SDL_Keycode.SDLK_q:
-                                    quit = true;
-                                    break;
-                            }
-                            break;
-                    }
-                }
-                Render(renderer, texture);
-            }
-            SDL.SDL_DestroyTexture(texture);
-            SDL.SDL_DestroyRenderer(renderer);
-            SDL.SDL_DestroyWindow(window);
-            SDL.SDL_Quit();
+            // while (!quit)
+            // {
+            //     Render(renderer, texture);
+            // }
 #endif
         }
 
