@@ -1,36 +1,39 @@
 ﻿<!-- <Project DefaultTargets="LinkNative"> -->
-  <Project >
-    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-  <PropertyGroup>
-    <LangVersion>preview</LangVersion>
-  </PropertyGroup>
 
-  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-  <Import Project="$(IlcPath)\build\Microsoft.NETCore.Native.targets" Condition="$(NativeCodeGen) == 'wasm'"/>
+		<RuntimeIdentifier>wasi-wasm</RuntimeIdentifier>
+		<UseAppHost>false</UseAppHost>
+		<PublishTrimmed>true</PublishTrimmed>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<WitGeneratedFilesRoot>Generated\</WitGeneratedFilesRoot>
+		<WitBindgenExe>C:\github\wit-bindgen\target\debug\wit-bindgen</WitBindgenExe>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <IlcArg Include="--targetarch=$(Platform)" />
-  </ItemGroup>
+	<PropertyGroup>
+		<DefineConstants Condition="$(NativeCodeGen) == 'wasm'">$(DefineConstants);CODEGEN_WASM</DefineConstants>
+		<!-- Size options -->
+		<!--<RootAllApplicationAssemblies>false</RootAllApplicationAssemblies>
+    <IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>-->
 
-  <PropertyGroup>
-    <DefineConstants Condition="$(NativeCodeGen) == 'wasm'">$(DefineConstants);CODEGEN_WASM</DefineConstants>
-    <RootAllApplicationAssemblies>false</RootAllApplicationAssemblies>
-    <IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>
-  </PropertyGroup>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <EmccExtraArgs>-s USE_SDL=2</EmccExtraArgs>
-  </PropertyGroup>
-  <!-- <ItemGroup Condition="Ta"> -->
-  <!--   <None Include="e:\sdl\sdl2.dll"> -->
-  <!--     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory> -->
-  <!--   </None> -->
-  <!-- </ItemGroup> -->
+	<ItemGroup>
+		<CustomLinkerArg Include="-Wl,--wasi-adapter,proxy" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="BytecodeAlliance.Componentize.DotNet.Wasm.SDK" Version="0.3.0-preview00006" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Wit Remove="**\*.wit" />
+		<Wit Include="../wasi-gfx-runtime/wit" World="example" />
+	</ItemGroup>
 </Project>
