@@ -219,10 +219,10 @@ namespace ExampleWorld
                 {
                     var pIx = y * Width + x;
                     var index = firePixels.Data[pIx];
-                    frameBuffer.Set(pIx, (uint)((palette[index * 3 + 0] << 24)
-                                         | (palette[index * 3 + 1] << 16)
-                                         | (palette[index * 3 + 2] << 8)
-                                         | 255));
+                    frameBuffer.Set(pIx, (uint)((palette[index * 3 + 0] << 16)
+                                         | (palette[index * 3 + 1] << 8)
+                                         | (palette[index * 3 + 2] << 0)
+                                         | 0 << 24));
                 }
             }
         }

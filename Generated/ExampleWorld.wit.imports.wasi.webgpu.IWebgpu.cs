@@ -9999,31 +9999,6 @@ public interface IWebgpu {
 
             }
 
-            public class ImageBitmap: IDisposable {
-                internal int Handle { get; set; }
-
-                public readonly record struct THandle(int Handle);
-
-                public ImageBitmap(THandle handle) {
-                    Handle = handle.Handle;
-                }
-
-                public void Dispose() {
-                    Dispose(true);
-                }
-
-                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]image-bitmap"), WasmImportLinkage]
-                private static extern void wasmImportResourceDrop(int p0);
-
-                protected virtual void Dispose(bool disposing) {
-                    if (disposing && Handle != 0) {
-                        wasmImportResourceDrop(Handle);
-                        Handle = 0;
-                    }
-                }
-
-            }
-
             public class GpuCompilationInfo: IDisposable {
                 internal int Handle { get; set; }
 
@@ -10049,12 +10024,12 @@ public interface IWebgpu {
 
             }
 
-            public class OffscreenCanvas: IDisposable {
+            public class ArrayBuffer: IDisposable {
                 internal int Handle { get; set; }
 
                 public readonly record struct THandle(int Handle);
 
-                public OffscreenCanvas(THandle handle) {
+                public ArrayBuffer(THandle handle) {
                     Handle = handle.Handle;
                 }
 
@@ -10062,7 +10037,7 @@ public interface IWebgpu {
                     Dispose(true);
                 }
 
-                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]offscreen-canvas"), WasmImportLinkage]
+                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]array-buffer"), WasmImportLinkage]
                 private static extern void wasmImportResourceDrop(int p0);
 
                 protected virtual void Dispose(bool disposing) {
@@ -10074,12 +10049,12 @@ public interface IWebgpu {
 
             }
 
-            public class AllowSharedBufferSource: IDisposable {
+            public class ImageBitmap: IDisposable {
                 internal int Handle { get; set; }
 
                 public readonly record struct THandle(int Handle);
 
-                public AllowSharedBufferSource(THandle handle) {
+                public ImageBitmap(THandle handle) {
                     Handle = handle.Handle;
                 }
 
@@ -10087,32 +10062,7 @@ public interface IWebgpu {
                     Dispose(true);
                 }
 
-                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]allow-shared-buffer-source"), WasmImportLinkage]
-                private static extern void wasmImportResourceDrop(int p0);
-
-                protected virtual void Dispose(bool disposing) {
-                    if (disposing && Handle != 0) {
-                        wasmImportResourceDrop(Handle);
-                        Handle = 0;
-                    }
-                }
-
-            }
-
-            public class VideoFrame: IDisposable {
-                internal int Handle { get; set; }
-
-                public readonly record struct THandle(int Handle);
-
-                public VideoFrame(THandle handle) {
-                    Handle = handle.Handle;
-                }
-
-                public void Dispose() {
-                    Dispose(true);
-                }
-
-                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]video-frame"), WasmImportLinkage]
+                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]image-bitmap"), WasmImportLinkage]
                 private static extern void wasmImportResourceDrop(int p0);
 
                 protected virtual void Dispose(bool disposing) {
@@ -10174,6 +10124,31 @@ public interface IWebgpu {
 
             }
 
+            public class OffscreenCanvas: IDisposable {
+                internal int Handle { get; set; }
+
+                public readonly record struct THandle(int Handle);
+
+                public OffscreenCanvas(THandle handle) {
+                    Handle = handle.Handle;
+                }
+
+                public void Dispose() {
+                    Dispose(true);
+                }
+
+                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]offscreen-canvas"), WasmImportLinkage]
+                private static extern void wasmImportResourceDrop(int p0);
+
+                protected virtual void Dispose(bool disposing) {
+                    if (disposing && Handle != 0) {
+                        wasmImportResourceDrop(Handle);
+                        Handle = 0;
+                    }
+                }
+
+            }
+
             public class HtmlImageElement: IDisposable {
                 internal int Handle { get; set; }
 
@@ -10188,81 +10163,6 @@ public interface IWebgpu {
                 }
 
                 [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]html-image-element"), WasmImportLinkage]
-                private static extern void wasmImportResourceDrop(int p0);
-
-                protected virtual void Dispose(bool disposing) {
-                    if (disposing && Handle != 0) {
-                        wasmImportResourceDrop(Handle);
-                        Handle = 0;
-                    }
-                }
-
-            }
-
-            public class EventHandler: IDisposable {
-                internal int Handle { get; set; }
-
-                public readonly record struct THandle(int Handle);
-
-                public EventHandler(THandle handle) {
-                    Handle = handle.Handle;
-                }
-
-                public void Dispose() {
-                    Dispose(true);
-                }
-
-                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]event-handler"), WasmImportLinkage]
-                private static extern void wasmImportResourceDrop(int p0);
-
-                protected virtual void Dispose(bool disposing) {
-                    if (disposing && Handle != 0) {
-                        wasmImportResourceDrop(Handle);
-                        Handle = 0;
-                    }
-                }
-
-            }
-
-            public class ArrayBuffer: IDisposable {
-                internal int Handle { get; set; }
-
-                public readonly record struct THandle(int Handle);
-
-                public ArrayBuffer(THandle handle) {
-                    Handle = handle.Handle;
-                }
-
-                public void Dispose() {
-                    Dispose(true);
-                }
-
-                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]array-buffer"), WasmImportLinkage]
-                private static extern void wasmImportResourceDrop(int p0);
-
-                protected virtual void Dispose(bool disposing) {
-                    if (disposing && Handle != 0) {
-                        wasmImportResourceDrop(Handle);
-                        Handle = 0;
-                    }
-                }
-
-            }
-
-            public class HtmlVideoElement: IDisposable {
-                internal int Handle { get; set; }
-
-                public readonly record struct THandle(int Handle);
-
-                public HtmlVideoElement(THandle handle) {
-                    Handle = handle.Handle;
-                }
-
-                public void Dispose() {
-                    Dispose(true);
-                }
-
-                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]html-video-element"), WasmImportLinkage]
                 private static extern void wasmImportResourceDrop(int p0);
 
                 protected virtual void Dispose(bool disposing) {
@@ -10299,6 +10199,31 @@ public interface IWebgpu {
 
             }
 
+            public class AllowSharedBufferSource: IDisposable {
+                internal int Handle { get; set; }
+
+                public readonly record struct THandle(int Handle);
+
+                public AllowSharedBufferSource(THandle handle) {
+                    Handle = handle.Handle;
+                }
+
+                public void Dispose() {
+                    Dispose(true);
+                }
+
+                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]allow-shared-buffer-source"), WasmImportLinkage]
+                private static extern void wasmImportResourceDrop(int p0);
+
+                protected virtual void Dispose(bool disposing) {
+                    if (disposing && Handle != 0) {
+                        wasmImportResourceDrop(Handle);
+                        Handle = 0;
+                    }
+                }
+
+            }
+
             /**
             * JS built-in objects.
             * These should probably be replaced with things that make sense in wit.
@@ -10318,6 +10243,81 @@ public interface IWebgpu {
                 }
 
                 [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]uint32-array"), WasmImportLinkage]
+                private static extern void wasmImportResourceDrop(int p0);
+
+                protected virtual void Dispose(bool disposing) {
+                    if (disposing && Handle != 0) {
+                        wasmImportResourceDrop(Handle);
+                        Handle = 0;
+                    }
+                }
+
+            }
+
+            public class EventHandler: IDisposable {
+                internal int Handle { get; set; }
+
+                public readonly record struct THandle(int Handle);
+
+                public EventHandler(THandle handle) {
+                    Handle = handle.Handle;
+                }
+
+                public void Dispose() {
+                    Dispose(true);
+                }
+
+                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]event-handler"), WasmImportLinkage]
+                private static extern void wasmImportResourceDrop(int p0);
+
+                protected virtual void Dispose(bool disposing) {
+                    if (disposing && Handle != 0) {
+                        wasmImportResourceDrop(Handle);
+                        Handle = 0;
+                    }
+                }
+
+            }
+
+            public class HtmlVideoElement: IDisposable {
+                internal int Handle { get; set; }
+
+                public readonly record struct THandle(int Handle);
+
+                public HtmlVideoElement(THandle handle) {
+                    Handle = handle.Handle;
+                }
+
+                public void Dispose() {
+                    Dispose(true);
+                }
+
+                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]html-video-element"), WasmImportLinkage]
+                private static extern void wasmImportResourceDrop(int p0);
+
+                protected virtual void Dispose(bool disposing) {
+                    if (disposing && Handle != 0) {
+                        wasmImportResourceDrop(Handle);
+                        Handle = 0;
+                    }
+                }
+
+            }
+
+            public class VideoFrame: IDisposable {
+                internal int Handle { get; set; }
+
+                public readonly record struct THandle(int Handle);
+
+                public VideoFrame(THandle handle) {
+                    Handle = handle.Handle;
+                }
+
+                public void Dispose() {
+                    Dispose(true);
+                }
+
+                [DllImport("wasi:webgpu/webgpu", EntryPoint = "[resource-drop]video-frame"), WasmImportLinkage]
                 private static extern void wasmImportResourceDrop(int p0);
 
                 protected virtual void Dispose(bool disposing) {
